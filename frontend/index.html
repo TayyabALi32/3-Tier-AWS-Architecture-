@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AWS 3-Tier Docker App</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        input, button { padding: 10px; font-size: 16px; }
+        li { background: #f4f4f4; margin: 8px 0; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h2>3-Tier Docker Application on AWS</h2>
+    <input type="text" id="taskInput" placeholder="Enter a new task..." />
+    <button onclick="addTask()">Add to Database</button>
+    <h3>Stored in PostgreSQL (Tier 3):</h3>
+    <ul id="taskList"></ul>
+
+    <script>
+        async function loadTasks() {
+            const res = await fetch('/api/items');
+            const items = await res.json();
+            document.getElementById('taskList').innerHTML = items
+                .map(i => `<li><strong>#${i.id}:</strong> ${i.name} <em>(${i.created_at})</em></li>`)
+                .join('');
+        }
+        async function addTask() {
+            const input = document.getElementById('taskInput');
+            if (!input.value) return;
+            await fetch('/api/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: input.value })
+            });
+            input.value = '';
+            loadTasks();
+        }
+        loadTasks();
+    </script>
+</body>
+</html>
